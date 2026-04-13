@@ -1,0 +1,6 @@
+@DanmarksRadioREST_HostAddress = http://localhost:5151
+
+GET {{DanmarksRadioREST_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
