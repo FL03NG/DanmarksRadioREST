@@ -1,7 +1,9 @@
 using DanmarksRadioREST.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
+using Swashbuckle.AspNetCore.SwaggerGen;
 namespace DanmarksRadioREST
 {
     public class Program
@@ -28,7 +30,8 @@ namespace DanmarksRadioREST
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
-            var key = "1235";
+            var jwtsettings = builder.Configuration.GetSection("JwtSettings");
+            var key = Encoding.ASCII.GetBytes(jwtsettings["Key"]);
 
             builder.Services.AddAuthentication(options =>
             {
@@ -39,16 +42,43 @@ namespace DanmarksRadioREST
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "YourIssuer",
-                    ValidAudience = "YourAudience",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                    ValidIssuer = jwtsettings["Issuer"],
+                    ValidAudience = jwtsettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
 
+            builder.Services.AddAuthorization();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "DanmarksRadioREST API", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -56,7 +86,8 @@ namespace DanmarksRadioREST
             {
                 app.MapOpenApi();
             }
-
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("AllowAll");
