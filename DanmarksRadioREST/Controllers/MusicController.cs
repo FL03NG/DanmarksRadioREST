@@ -18,6 +18,7 @@ namespace DanmarksRadioREST.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public ActionResult<IEnumerable<MusicRecord>> GetAll(
         [FromQuery] string? title,
         [FromQuery] string? artist

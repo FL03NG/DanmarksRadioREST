@@ -37,7 +37,7 @@ namespace DanmarksRadioREST.Controllers
         }
         private string GenerateToken(string username, string role)
         {
-            var jwtsettings = _config.GetSection("Jwt");
+            var jwtsettings = _config.GetSection("JwtSettings");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtsettings["Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
@@ -56,8 +56,8 @@ namespace DanmarksRadioREST.Controllers
         }
         public class LoginRequest
         {
-            public string Username { get; set; }
-            public string Password { get; set; }
+            public string Username { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
         }
     }
 }
