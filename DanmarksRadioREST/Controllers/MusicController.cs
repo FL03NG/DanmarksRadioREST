@@ -16,13 +16,32 @@ namespace DanmarksRadioREST.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<MusicRecord>> GetAll()
+        public ActionResult<IEnumerable<MusicRecord>> GetAll(
+        [FromQuery] string? title,
+        [FromQuery] string? artist
+        )
         {
-            var musicRecords = _musicRepository.GetAll();
-            if(musicRecords == null)
+            IEnumerable<MusicRecord> musicRecords = _musicRepository.GetAll();
+
+            if (!string.IsNullOrWhiteSpace(title))
             {
-                return NotFound();
+                musicRecords = musicRecords.Where(m =>
+                    !string.IsNullOrEmpty(m.Title) &&
+                    m.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
             }
+
+            if (!string.IsNullOrWhiteSpace(artist))
+            {
+                musicRecords = musicRecords.Where(m =>
+                    !string.IsNullOrEmpty(m.Artist) &&
+                    m.Artist.Contains(artist, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!musicRecords.Any())
+            {
+                return NoContent(); // 204
+            }
+
             return Ok(musicRecords);
         }
     }
