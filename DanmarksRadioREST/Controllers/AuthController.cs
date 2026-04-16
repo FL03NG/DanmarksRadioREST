@@ -33,7 +33,7 @@ namespace DanmarksRadioREST.Controllers
             }
 
             var token = GenerateToken(login.Username, role);
-            return Ok(new { token, role });
+            return Ok(new { token });
         }
         private string GenerateToken(string username, string role)
         {

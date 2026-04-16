@@ -88,9 +88,10 @@ namespace DanmarksRadioREST
             }
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseCors("AllowAll");
+
             app.MapControllers();
 
             app.Run();
