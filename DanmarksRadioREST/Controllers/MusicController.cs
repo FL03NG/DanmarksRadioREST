@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DanmarksRadioREST.Models;
 using DanmarksRadioREST.Repo;
-using DanmarksRadioREST.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DanmarksRadioREST.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MusicController : Controller
@@ -18,34 +17,75 @@ namespace DanmarksRadioREST.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,User")]
-        public ActionResult<IEnumerable<MusicRecord>> GetAll(
-        [FromQuery] string? title,
-        [FromQuery] string? artist
-        )
+        public ActionResult<IEnumerable<MusicRecord>> GetAll()
         {
-            IEnumerable<MusicRecord> musicRecords = _musicRepository.GetAll();
+            List<MusicRecord> musicRecords = _musicRepository.GetAll();
 
-            if (!string.IsNullOrWhiteSpace(title))
+            if (musicRecords == null || musicRecords.Count == 0)
             {
-                musicRecords = musicRecords.Where(m =>
-                    !string.IsNullOrEmpty(m.Title) &&
-                    m.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(artist))
-            {
-                musicRecords = musicRecords.Where(m =>
-                    !string.IsNullOrEmpty(m.Artist) &&
-                    m.Artist.Contains(artist, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!musicRecords.Any())
-            {
-                return NoContent(); // 204
+                return NoContent();
             }
 
             return Ok(musicRecords);
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<MusicRecord> GetById(int id)
+        {
+            MusicRecord? musicRecord = _musicRepository.GetById(id);
+
+            if (musicRecord == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(musicRecord);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public ActionResult<MusicRecord> Add([FromBody] MusicRecord musicRecord)
+        {
+            if (musicRecord == null)
+            {
+                return BadRequest();
+            }
+
+            MusicRecord createdRecord = _musicRepository.Add(musicRecord);
+            return CreatedAtAction(nameof(GetById), new { id = createdRecord.Id }, createdRecord);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public ActionResult<MusicRecord> Update(int id, [FromBody] MusicRecord musicRecord)
+        {
+            if (musicRecord == null)
+            {
+                return BadRequest();
+            }
+
+            MusicRecord? updatedRecord = _musicRepository.Update(id, musicRecord);
+
+            if (updatedRecord == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedRecord);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(int id)
+        {
+            bool deleted = _musicRepository.Delete(id);
+
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
     }
 }
