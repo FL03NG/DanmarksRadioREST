@@ -14,7 +14,7 @@ namespace DanmarksRadioREST.Repo
                 new MusicRecord { Id = 2, Title = "Imagine", Artist = "John Lennon", Duration = 183, Year = 1971 },
                 new MusicRecord { Id = 3, Title = "Stairway to Heaven", Artist = "Led Zeppelin", Duration = 482, Year = 1971 }
             };
-            _nextId = 4;
+           
         }
 
         public List<MusicRecord> GetAll()
