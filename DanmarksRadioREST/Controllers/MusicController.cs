@@ -1,4 +1,6 @@
-﻿using DanmarksRadioREST.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using DanmarksRadioREST.Repo;
+using DanmarksRadioREST.Models;
 using DanmarksRadioREST.Repo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -86,6 +88,25 @@ namespace DanmarksRadioREST.Controllers
             }
 
             return NoContent();
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public ActionResult<MusicRecord> Add([FromBody] MusicRecord musicRecord)
+        {
+            if (musicRecord == null)
+            {
+                return BadRequest("Music record cannot be null.");
+            }
+            MusicRecord? createdRecord = _musicRepository.Add(musicRecord);
+            if (createdRecord == null)
+            {
+                return BadRequest("Invalid music record data.");
+            }
+            return CreatedAtAction(nameof(GetAll), new { id = createdRecord.Id }, createdRecord);
         }
     }
 }

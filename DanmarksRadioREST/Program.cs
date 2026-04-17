@@ -100,6 +100,7 @@ namespace DanmarksRadioREST
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseCors("AllowAll");
 
             app.MapControllers();
 
