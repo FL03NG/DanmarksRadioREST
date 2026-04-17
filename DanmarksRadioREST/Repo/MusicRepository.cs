@@ -15,7 +15,7 @@ namespace DanmarksRadioREST.Repo
                 new MusicRecord { Id = 3, Title = "Stairway to Heaven", Artist = "Led Zeppelin", Duration = 482, Year = 1971 }
             };
            
-        }
+        } //hej
 
         public List<MusicRecord> GetAll()
         {
