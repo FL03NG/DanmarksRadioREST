@@ -19,11 +19,27 @@ namespace DanmarksRadioREST.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<MusicRecord>> GetAll()
+        public ActionResult<IEnumerable<MusicRecord>> GetAll(
+    [FromQuery] string? title,
+    [FromQuery] string? artist)
         {
-            List<MusicRecord> musicRecords = _musicRepository.GetAll();
+            var musicRecords = _musicRepository.GetAll();
 
-            if (musicRecords == null || musicRecords.Count == 0)
+            if (!string.IsNullOrEmpty(title))
+            {
+                musicRecords = musicRecords
+                    .Where(m => m.Title.ToLower().Contains(title.ToLower()))
+                    .ToList();
+            }
+
+            if (!string.IsNullOrEmpty(artist))
+            {
+                musicRecords = musicRecords
+                    .Where(m => m.Artist.ToLower().Contains(artist.ToLower()))
+                    .ToList();
+            }
+
+            if (musicRecords.Count == 0)
             {
                 return NoContent();
             }
@@ -44,18 +60,7 @@ namespace DanmarksRadioREST.Controllers
             return Ok(musicRecord);
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<MusicRecord> Add([FromBody] MusicRecord musicRecord)
-        {
-            if (musicRecord == null)
-            {
-                return BadRequest();
-            }
-
-            MusicRecord createdRecord = _musicRepository.Add(musicRecord);
-            return CreatedAtAction(nameof(GetById), new { id = createdRecord.Id }, createdRecord);
-        }
+        
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
