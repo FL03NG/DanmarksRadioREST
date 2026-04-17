@@ -1,61 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using DanmarksRadioREST.Models;
+﻿using DanmarksRadioREST.Models;
 
 namespace DanmarksRadioREST.Repo
 {
     public class MusicRepository : IMusicRepository
     {
-        private readonly List<MusicRecord> _musicRecords;
-        private int _nextId;
+        private readonly List<MusicRecord> _music;
 
         public MusicRepository()
         {
-            _musicRecords = new List<MusicRecord>
+            _music = new List<MusicRecord>
             {
                 new MusicRecord { Id = 1, Title = "Bohemian Rhapsody", Artist = "Queen", Duration = 354, Year = 1975 },
                 new MusicRecord { Id = 2, Title = "Imagine", Artist = "John Lennon", Duration = 183, Year = 1971 },
                 new MusicRecord { Id = 3, Title = "Stairway to Heaven", Artist = "Led Zeppelin", Duration = 482, Year = 1971 }
             };
-            _nextId = 4;
-        }
-        public IEnumerable<MusicRecord> GetAll()
+           
+        } //hej
+
+        public List<MusicRecord> GetAll()
         {
-            return _musicRecords;
+            return _music;
         }
-        public MusicRecord? Add(MusicRecord musicRecord)
+
+        public MusicRecord Add(MusicRecord musicRecord)
         {
+            int newId = 1;
+
+            if (_music.Count > 0)
+            {
+                newId = _music.Max(m => m.Id) + 1;
+            }
+
+            musicRecord.Id = newId;
+            _music.Add(musicRecord);
+
+            return musicRecord;
+        }
+
+        public MusicRecord? GetById(int id)
+        {
+            return _music.FirstOrDefault(m => m.Id == id);
+        }
+
+        public MusicRecord? Update(int id, MusicRecord updatedRecord)
+        {
+            MusicRecord? existingRecord = GetById(id);
+
+            if (existingRecord == null)
+            {
+                return null;
+            }
+
+            existingRecord.Title = updatedRecord.Title;
+            existingRecord.Artist = updatedRecord.Artist;
+            existingRecord.Duration = updatedRecord.Duration;
+            existingRecord.Year = updatedRecord.Year;
+
+            return existingRecord;
+        }
+
+        public bool Delete(int id)
+        {
+            MusicRecord? musicRecord = GetById(id);
+
             if (musicRecord == null)
             {
-                return null;
+                return false;
             }
-            if (string.IsNullOrWhiteSpace(musicRecord.Title))
-            {
-                return null;
-            }
-            if (string.IsNullOrWhiteSpace(musicRecord.Artist))
-            {
-                return null;
-            }
-            if (musicRecord.Duration <= 0)
-            {
-                return null;
-            }
-            if (musicRecord.Year <= 0)
-            {
-                return null;
-            }
-            MusicRecord newRecord = new MusicRecord
-            {
-                Id = _nextId,
-                Title = musicRecord.Title,
-                Artist = musicRecord.Artist,
-                Duration = musicRecord.Duration,
-                Year = musicRecord.Year
-            };
-            _musicRecords.Add(newRecord);
-            _nextId++;
-            return newRecord;
+
+            _music.Remove(musicRecord);
+            return true;
         }
     }
 }

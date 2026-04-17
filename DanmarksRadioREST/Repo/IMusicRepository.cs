@@ -4,7 +4,10 @@ namespace DanmarksRadioREST.Repo
 {
     public interface IMusicRepository
     {
-        IEnumerable<MusicRecord> GetAll();
-        MusicRecord? Add(MusicRecord musicRecord);
+        List<MusicRecord> GetAll();
+        MusicRecord Add(MusicRecord musicRecord);
+        MusicRecord? GetById(int id);
+        MusicRecord? Update(int id, MusicRecord updatedRecord);
+        bool Delete(int id);
     }
 }
